@@ -1,0 +1,9 @@
+{
+  "vaults": [
+    {
+      "id": "minecraft",
+      "title": "Minecraft",
+      "description": "Minecraft mechanics, code explanations and bugs I've found along the way..."
+    }
+  ]
+}

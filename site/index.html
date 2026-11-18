@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vaults</title>
+    <script>
+      // Same storage key and attribute as Quartz's dark mode toggle.
+      try {
+        const theme =
+          localStorage.getItem("theme") ??
+          (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")
+        document.documentElement.setAttribute("saved-theme", theme)
+      } catch {}
+
+      // Go to the last opened vault unless want to switch (?choose).
+      try {
+        const last = localStorage.getItem("lastVault")
+        const known = [] /* VAULT_IDS */
+        if (!new URLSearchParams(location.search).has("choose") && known.includes(last)) {
+          location.replace("./" + encodeURIComponent(last) + "/")
+        }
+      } catch {}
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400..700&display=swap"
+    />
+    <style>
+      :root {
+        --bg: hsl(0 0% 1%);
+        --surface: hsl(0 0% 4%);
+        --surface-hover: hsl(0 0% 9%);
+        --border: hsl(0 0% 28%);
+        --border-muted: hsl(0 0% 13%);
+        --text: hsl(0 0% 95%);
+        --text-muted: hsl(0 0% 69%);
+        --text-dimmed: hsl(0 0% 95% / 0.35);
+        --primary: hsl(311 78% 72%);
+        color-scheme: dark;
+      }
+      :root[saved-theme="light"] {
+        --bg: hsl(0 0% 96%);
+        --surface: hsl(0 0% 100%);
+        --surface-hover: hsl(0 0% 93%);
+        --border: hsl(0 0% 72%);
+        --border-muted: hsl(0 0% 87%);
+        --text: hsl(0 0% 9%);
+        --text-muted: hsl(0 0% 36%);
+        --text-dimmed: hsl(0 0% 9% / 0.45);
+        --primary: hsl(311 60% 45%);
+        color-scheme: light;
+      }
+
+      .vault-picker {
+        box-sizing: border-box;
+        display: grid;
+        place-items: center;
+        min-height: 100vh;
+        min-height: 100dvh;
+        margin: 0;
+        padding: 4rem 16px;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Outfit", system-ui, sans-serif;
+        font-size: 1.15rem;
+        line-height: 1.4;
+      }
+
+      .vault-picker * {
+        box-sizing: border-box;
+        font-family: inherit;
+      }
+
+      .vault-picker .theme-toggle {
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        display: inline-grid;
+        place-items: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        padding: 0;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--text-muted);
+        cursor: pointer;
+        transition:
+          color 0.15s,
+          background-color 0.15s;
+      }
+      .vault-picker .theme-toggle:hover {
+        color: var(--text);
+        background: var(--surface-hover);
+      }
+      .vault-picker .theme-toggle svg {
+        width: 1.1rem;
+        height: 1.1rem;
+        transition: transform 0.2s ease-out;
+      }
+      :root[saved-theme="light"] .vault-picker .theme-toggle svg {
+        transform: rotate(180deg);
+      }
+
+      .vault-picker main {
+        width: 100%;
+        max-width: 30rem;
+        text-align: center;
+      }
+      .vault-picker h1 {
+        margin: 1rem 0;
+        font-size: 2rem;
+        font-weight: 600;
+      }
+      .vault-picker .hint {
+        margin: 0.25rem 0 1.75rem;
+        color: var(--text-dimmed);
+        font-size: 0.95rem;
+      }
+
+      .vault-picker ul {
+        display: grid;
+        gap: 0.75rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        text-align: left;
+      }
+      .vault-picker a {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.875rem 1rem;
+        border: 1px solid var(--border-muted);
+        border-radius: 10px;
+        background: var(--surface);
+        color: inherit;
+        text-decoration: none;
+        transition:
+          border-color 0.15s,
+          background-color 0.15s;
+      }
+      .vault-picker a:hover {
+        border-color: var(--border);
+        background: var(--surface-hover);
+      }
+      .vault-picker a:focus-visible,
+      .vault-picker .theme-toggle:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+      }
+      .vault-picker .text {
+        flex: 1;
+        min-width: 0;
+      }
+      .vault-picker .name {
+        display: block;
+        color: var(--primary);
+        font-weight: 600;
+      }
+      .vault-picker .description {
+        display: block;
+        margin-top: 0.15rem;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+      .vault-picker .arrow {
+        color: var(--text-dimmed);
+        transition:
+          color 0.15s,
+          transform 0.15s;
+      }
+      .vault-picker a:hover .arrow {
+        color: var(--text);
+        transform: translateX(2px);
+      }
+    </style>
+  </head>
+  <body class="vault-picker">
+    <!-- Inline onclick so the toggle still works when Quartz opens it back. -->
+    <button
+      class="theme-toggle"
+      type="button"
+      aria-label="Toggle light and dark mode"
+      title="Toggle light and dark mode"
+      onclick="const r=document.documentElement,t=r.getAttribute('saved-theme')==='light'?'dark':'light';r.setAttribute('saved-theme',t);try{localStorage.setItem('theme',t)}catch(e){}"
+    >
+      <svg viewBox="0 0 16 16" aria-hidden="true">
+        <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5" />
+        <path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor" />
+      </svg>
+    </button>
+    <main>
+      <h1>Vaults</h1>
+      <!-- <p class="hint">Pick a vault to view</p> -->
+      <ul>
+        <!-- VAULT_LINKS -->
+      </ul>
+    </main>
+  </body>
+</html>
