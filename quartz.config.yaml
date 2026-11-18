@@ -218,8 +218,7 @@ plugins:
   - source: "@quartz-community/footer"
     enabled: true
     options:
-      links:
-        All vaults: /obsidian/?choose
+      links: {}
     layout:
       position: footer
       priority: 50
